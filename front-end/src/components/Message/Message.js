@@ -1,0 +1,31 @@
+import styles from './Message.module.css'; 
+
+import { useState } from 'react';
+import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
+
+
+// Message component renders a single chat message bubble, with like functionality
+export default function Message({message, onLike, isLiked, currentUser}){
+    // Determine if the current user is the author of this message
+    const isOwner = message.author.name === currentUser;
+    return(
+        // Apply owner styling if the message belongs to the current user
+        <div className={styles.message__container + (isOwner ? " " + styles.message__owner : "")}>
+
+            {/* Author name container */}
+            <div className={styles.message__author__container}>
+                <strong className={styles.message__author}>{message.author.name}</strong>
+            </div>
+
+            {/* Message text content */}
+            <div className={styles.message__content}>
+                <span className={styles.message__text}>{message.content}</span>
+            </div>
+
+            {/* Like button*/}
+            <div className={styles.message__like__container}>
+                <button className={styles.message__like + (isLiked ? " " + styles.like_active : "")} onClick={onLike}>{isLiked ? <MdFavorite /> : <MdFavoriteBorder />} {message.likes}</button>
+            </div>
+        </div>
+    )
+}
