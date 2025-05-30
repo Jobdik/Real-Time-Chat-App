@@ -1,11 +1,11 @@
+import React from 'react';
 import styles from './Message.module.css'; 
 
-import { useState } from 'react';
 import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 
 
 // Message component renders a single chat message bubble, with like functionality
-export default function Message({message, onLike, isLiked, currentUser}){
+function Message({message, onLike, isLiked, currentUser}){
     // Determine if the current user is the author of this message
     const isOwner = message.author.name === currentUser;
     return(
@@ -24,8 +24,18 @@ export default function Message({message, onLike, isLiked, currentUser}){
 
             {/* Like button*/}
             <div className={styles.message__like__container}>
-                <button className={styles.message__like + (isLiked ? " " + styles.like_active : "")} onClick={onLike}>{isLiked ? <MdFavorite /> : <MdFavoriteBorder />} {message.likes}</button>
+                <button className={styles.message__like + (isLiked ? " " + styles.like_active : "")} onClick={() => onLike(message.id)}>{isLiked ? <MdFavorite /> : <MdFavoriteBorder />} {message.likes}</button>
             </div>
         </div>
     )
 }
+
+export default React.memo(Message, 
+    (prevProps, nextProps) =>{
+        return(
+            prevProps.message.id === nextProps.message.id &&
+            prevProps.message.likes === nextProps.message.likes &&
+            prevProps.isLiked === nextProps.isLiked &&
+            prevProps.currentUser === nextProps.currentUser
+        )
+})
