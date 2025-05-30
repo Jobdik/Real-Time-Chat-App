@@ -8,6 +8,7 @@ import { MdFavorite, MdFavoriteBorder } from "react-icons/md";
 function Message({message, onLike, isLiked, currentUser}){
     // Determine if the current user is the author of this message
     const isOwner = message.author.name === currentUser;
+    console.log(message.creation_date);
     return(
         // Apply owner styling if the message belongs to the current user
         <div className={styles.message__container + (isOwner ? " " + styles.message__owner : "")}>
@@ -24,6 +25,14 @@ function Message({message, onLike, isLiked, currentUser}){
 
             {/* Like button*/}
             <div className={styles.message__like__container}>
+                <span className={styles.message__send__time}>{
+                    new Date(message.creation_date).toLocaleTimeString(undefined,{
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                    })}
+                </span>
+                
                 <button className={styles.message__like + (isLiked ? " " + styles.like_active : "")} onClick={() => onLike(message.id)}>{isLiked ? <MdFavorite /> : <MdFavoriteBorder />} {message.likes}</button>
             </div>
         </div>
