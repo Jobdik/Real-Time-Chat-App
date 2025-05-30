@@ -41,9 +41,8 @@
     position: relative;
 }
 
-.messages_container{
-    height: 100%;
-    width: 100%;
+.masseges_container_wrapper::-webkit-scrollbar {
+    display: none;
 }
 
 

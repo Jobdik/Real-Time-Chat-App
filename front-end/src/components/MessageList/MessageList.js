@@ -1,12 +1,18 @@
+import styles from './MessageList.module.css'
 import React, { useMemo, useCallback, forwardRef} from 'react';
 
 import { Virtuoso } from 'react-virtuoso';
 
 import Message from '../Message/Message';
 
+import { FaArrowDown } from "react-icons/fa";
+
 
 
 const MessageList = React.memo(function MessageList({ messages, likeMessage, likedSet, username }) {
+    const virtuosoRef = React.useRef(null);
+    const [bottom, setBottom] = React.useState(true);
+
     
     const Item = useMemo(()=> forwardRef(
         (props, ref) => (
@@ -42,15 +48,34 @@ const MessageList = React.memo(function MessageList({ messages, likeMessage, lik
     ), [likeMessage, likedSet, username]);
 
     return (
-        <Virtuoso
-            style={{ height: '100%', width: '100%' }}
-            data={messages}
-            itemContent={renderRow}
-            initialTopMostItemIndex={messages.length - 1}
-            followOutput="smooth"
-            components={VirtuosoComponents}
-            computeItemKey={(_, message) => message.id}
-        />  
+        <div className={styles.masseges_container}>
+
+            <Virtuoso
+                ref={virtuosoRef}
+                style={{ height: '100%', width: '100%' }}
+                data={messages}
+                itemContent={renderRow}
+                initialTopMostItemIndex={messages.length - 1}
+                followOutput="smooth"
+                components={VirtuosoComponents}
+                computeItemKey={(_, message) => message.id}
+                atBottomStateChange={setBottom}
+            />  
+
+            {!bottom &&(
+                <button className={styles.scrollToBottom}
+                onClick={() =>{
+                    virtuosoRef.current?.scrollToIndex({
+                        index: messages.length - 1,
+                        align: 'end',
+                        behavior: 'smooth',
+                    });
+                }}>
+                    <FaArrowDown className={styles.scrollToBottom__icon}/>
+                </button>)
+            }
+
+        </div>
     );
 
 
