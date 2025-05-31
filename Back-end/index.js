@@ -2,11 +2,13 @@ require("dotenv").config();
 
 const express = require("express");
 const http = require("http");
+const cookieParser = require("cookie-parser");
 const {WebSocketServer} = require("ws");    
 const jwt = require("jsonwebtoken");
 const rateLimit = require("express-rate-limit");
 const cors  = require("cors");
 const {PrismaClient} = require("@prisma/client");
+const cookie = require("cookie");
 
 // Initialize Prisma ORM client for database operations
 const prisma = new PrismaClient();
@@ -14,10 +16,15 @@ const prisma = new PrismaClient();
 // Create Express app for REST endpoints
 const app = express();
 
-// Enable Cross-Origin Resource Sharing for all routes
-app.use(cors());
+app.use(cookieParser());
 
 app.use(express.json());
+
+// Enable Cross-Origin Resource Sharing for all routes
+app.use(cors({
+    origin: "http://localhost:3000",
+    credentials: true
+}));
 
 // Rate-limit login endpoint to 20 requests per minute per IP
 app.use("/login", rateLimit({
@@ -41,22 +48,53 @@ app.post("/login", async (req, res) => {
 
     // Sign a JWT that includes userId and username, expires in 1 day
     const token = jwt.sign({userId: user.id, username: user.name}, process.env.JWT_SECRET, {expiresIn: "1d"});
+
+    res.cookie("token", token,{
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 24 * 60 * 60 * 1000,
+        path: "/",
+    })
     // Send the token back to the client
-    res.json({token});
+    res.json({apruved: true,});
 });
+
+app.get("/auth", (req, res) =>{
+    const token = req.cookies.token;
+
+    if(!token) return res.json({auth: false});
+
+    // Verify JWT token from client
+    try {
+        jwt.verify(token, process.env.JWT_SECRET);
+        return res.json({auth: true, username: jwt.decode(token).username});
+    } catch(e){
+        return res.json({auth: false});
+    }
+})
 
 // Returns all chat messages, newest first, including author relation
 app.get("/messages", async (req, res) => {
-    const msgs = await prisma.message.findMany(
-        {
-            include:{author: true},
-            orderBy: {
-                creation_date: "desc"
-            }
-        }
-    );
+    const token = req.cookies.token;
 
-    res.json(msgs);
+    if(!token) return res.status(401).json({message: "Unauthorized"});
+
+    // Verify JWT token from client
+    try {
+        jwt.verify(token, process.env.JWT_SECRET);
+        const msgs = await prisma.message.findMany(
+            {
+                include:{author: true},
+                orderBy: {
+                    creation_date: "desc"
+                }
+            }
+        );
+        return res.json(msgs);
+    } catch(e){
+        return res.status(401).json({message: "Unauthorized"});
+    }
 });
 
 // Create HTTP server and attach Express app
@@ -69,31 +107,31 @@ const wss = new WebSocketServer({server});
 const UserStatus = new Map();
 
 // Handle new WebSocket connections
-wss.on("connection", ws => { 
-    ws.on("message", async raw =>{
-        let data;
-        try{
-            data = JSON.parse(raw);
-        } catch(e){
-            console.log(e);
-            return;
-        }
+wss.on("connection", (ws, request) => { 
 
-        // Handle authentication message
-        if(data.type === "auth"){
-            try {
-                // Verify JWT token from client
-                const payload = jwt.verify(data.token, process.env.JWT_SECRET);
-                const {username} = payload;
-                // Mark user as online
-                UserStatus.set(username, true);
-                // Broadcast updated user statuses to all clients
-                broadcastUsers();
-            }catch{
-                // On invalid token, send error back
-                ws.send(JSON.stringify({type: "error", message:"Invalid token"}));
-            }
-        }
+    const rawCookies = request.headers.cookie || "";
+    const cookies = cookie.parse(rawCookies);
+    const token = cookies.token;
+
+    if(!token){
+        ws.send(JSON.stringify({type: "error", message:"Unauthorized"}));
+        return ws.close();
+    }
+    
+    try{
+        const payload = jwt.verify(token, process.env.JWT_SECRET);
+        const {username} = payload;
+        ws.username = username;
+        UserStatus.set(username, true);
+        broadcastUsers();
+    }catch{
+        ws.send(JSON.stringify({type: "error", message:"Unauthorized"}));
+        return ws.close();
+    }
+    
+
+    ws.on("message", async raw =>{
+        const data = JSON.parse(raw);
 
         // Handle new chat message request
         if(data.type === "message"){
@@ -165,4 +203,4 @@ function broadcastUsers(){;
 }
 
 // Start HTTP + WebSocket server 
-server.listen(4000, () => console.log("Server is running on port 4000"));
+server.listen(4000, () => console.log("Server is running on port 4000")); 
