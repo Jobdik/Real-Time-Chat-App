@@ -1,4 +1,3 @@
-import React from 'react';
 import styles from './ChatPage.module.css';
 
 import { useState } from 'react';
@@ -12,12 +11,13 @@ import UserList from '../UsersList/UsersList';
 
 
 // Chat component receives a JWT token prop for authentication
-export default function Chat({token}){
-    // Decode the JWT to extract the current user's username
-    const {messages, users, sendMessage, likeMessage, username, likedSet} = useChat(token); 
+export default function Chat(username){
+    // Take dataset from custom web-socket hook
+    const {messages, users, sendMessage, likeMessage, likedSet} = useChat(username); 
 
     const [input, setInput] = useState('');
     
+    // Function to format and send message
     const handleSend = () =>{
        const text = input.trim();
        if(!text) return;

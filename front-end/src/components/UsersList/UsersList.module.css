@@ -1,5 +1,4 @@
 .user{
-    margin: 1rem;
     display: flex;
     flex-wrap: wrap;
     text-align: center;
@@ -7,9 +6,10 @@
     background-color: var(--deep_container);
     border-radius: 2rem;
     box-shadow: 0px 15px 20px rgba(0, 0, 0, 0.1);
-    padding: 1rem;
     cursor: pointer;
     transition: all 0.3s ease-in-out;
+    padding: 1rem;
+    margin: 0 1rem;
 }
 .user_icon{
     color:white;
