@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useChat } from '../../hooks/useChat';
 
 import { IoSend } from "react-icons/io5";
+import { FaUsers } from "react-icons/fa";
 
 import MessageList from '../MessageList/MessageList';
 import UserList from '../UsersList/UsersList';
@@ -16,6 +17,7 @@ export default function Chat(username){
     const {messages, users, sendMessage, likeMessage, likedSet} = useChat(username); 
 
     const [input, setInput] = useState('');
+    const [showUsers, setShowUsers] = useState(false);
     
     // Function to format and send message
     const handleSend = () =>{
@@ -31,7 +33,12 @@ export default function Chat(username){
             <div className={styles.container}>
                 {/* Header showing chat title */}
                 <div className={styles.top_container}>
-                    <span className={styles.active_users_span}>Just Chating! {}</span>
+                    <span className={styles.chat_title}>Just Chating!</span>
+                    <div className={styles.users_container_button}>
+                        <button className={styles.button_users} onClick={() => setShowUsers(!showUsers)}><FaUsers /></button>
+                        <div className={styles.users_icon_desktop} />
+                        <span className={styles.active_users}>{users.filter(user => user.online).length}</span>
+                    </div>
                 </div>
 
                 {/* Messages panel */}
@@ -41,14 +48,14 @@ export default function Chat(username){
 
                 {/* Input field and send button */}
                 <div className={styles.input_container}>
-                    <input className={styles.input_message} value={input} onChange={e => setInput(e.target.value)}></input>
+                    <input className={styles.input_message} value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSend(input)} placeholder="Type a message..."></input>
                     <button className={styles.button_send}onClick={() => handleSend(input)}><IoSend /></button>
                 </div>
 
             </div>
 
             {/* Sidebar showing user list and status */}
-            <div className={styles.right_container}>
+            <div className={`${styles.right_container} ${showUsers ? styles.show : styles.hide}`}>
                 <UserList users={users} />
             </div>
         </main>

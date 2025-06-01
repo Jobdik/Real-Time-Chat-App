@@ -89,3 +89,22 @@
 .like_active{
     color: var(--accent);
 }
+
+@media (max-width: 768px) {
+    .message__container{
+        max-width: 60%;
+    }
+    .message__author{
+        font-size: 1rem;
+    }
+    .message__content{
+        font-size: 0.8rem;
+    }
+    .message__send__time{
+        font-size: 0.8rem
+    }
+    .message__like{
+        font-size: 0.75rem
+    }
+}
+
