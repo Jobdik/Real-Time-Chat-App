@@ -20,9 +20,14 @@ app.use(cookieParser());
 
 app.use(express.json());
 
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:8081"
+]
+
 // Enable Cross-Origin Resource Sharing for all routes
 app.use(cors({
-    origin: "http://localhost:3000",
+    origin: allowedOrigins,
     credentials: true
 }));
 
@@ -68,7 +73,7 @@ app.get("/auth", (req, res) =>{
     // Verify JWT token from client
     try {
         jwt.verify(token, process.env.JWT_SECRET);
-        return res.json({auth: true, username: jwt.decode(token).username});
+        return res.json({auth: true, username: jwt.decode(token).username, userId: jwt.decode(token).userId});
     } catch(e){
         return res.json({auth: false});
     }
