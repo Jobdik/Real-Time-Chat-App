@@ -1,25 +1,22 @@
 import React, { useMemo, useCallback } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  Dimensions,
-} from "react-native";
+import { View, Text, FlatList, StyleSheet, Dimensions } from "react-native";
 
 import { MaterialIcons } from "@expo/vector-icons";
 
 import { ChatUser } from "../../hooks/useChat";
 
 import { Colors } from "@/constants/Colors";
+import { HoverableIcon } from "./HoverableIcon";
+import { Ionicons } from "@expo/vector-icons";
 
 interface UserListProps {
   users: ChatUser[];
+  onClose: () => void;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const UserList: React.FC<UserListProps> = React.memo(({ users }) => {
+const UserList: React.FC<UserListProps> = React.memo(({ users, onClose }) => {
   // Alphabetically sort users by name
   const sortedUsers = useMemo(() => {
     return [...users].sort((a, b) => a.username.localeCompare(b.username));
@@ -50,15 +47,30 @@ const UserList: React.FC<UserListProps> = React.memo(({ users }) => {
   );
 
   return (
-    <FlatList
-      data={sortedUsers}
-      extraData={users} // Ensures re-render if user props change
-      keyExtractor={(item) => item.username} // Use username as unique key
-      renderItem={renderItem}
-      contentContainerStyle={styles.listContent}
-      style={[styles.container, styles.shadow]}
-      ListEmptyComponent={<Text style={{ color: "#888", textAlign: "center" }}>No users online</Text>}
-    />
+    <>
+      <View style={[styles.container, styles.shadow]}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Users:</Text>
+          <HoverableIcon
+            IconComponent={Ionicons}
+            iconProps={{ name: "close", size: 24}}
+            fromColor="#fff"
+            toColor={Colors.dark.Accent}
+            containerStyle={styles.buttonClose}
+            onPress={onClose}
+          />
+        </View>
+        <FlatList
+        data={sortedUsers}
+        extraData={users} // Ensures re-render if user props change
+        keyExtractor={(item) => item.username} // Use username as unique key
+        renderItem={renderItem}
+        contentContainerStyle={styles.listContent}
+        style={styles.container_flatlist}
+        ListEmptyComponent={<Text style={{ color: "#888", textAlign: "center" }}>No users online</Text>}
+        />
+      </View>
+    </>
   );
 });
 
@@ -71,8 +83,33 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.Container,
     borderTopLeftRadius: 32,
     borderBottomLeftRadius: 32,
-    marginBottom: 16,
+    marginBottom: SCREEN_WIDTH >= 768 ? 16 : 0, 
+    marginTop: SCREEN_WIDTH >= 768 ? 16 : 0, 
+  },
+  header:{
     marginTop: 16,
+    marginHorizontal: 12,
+    height: 48,
+    backgroundColor: Colors.dark.Deep_Container,
+    borderRadius: 32,
+    justifyContent: "center",
+    textAlign: "center",
+  },
+  headerText: {
+    marginHorizontal: 12,
+    fontSize: 20,
+    lineHeight: 44,
+    fontWeight: "bold",
+    color: "#FFFFFF",
+    paddingBottom: 4,
+  },
+  buttonClose:{
+    position: "absolute",
+    right: 12,
+    top: 12,
+  },
+  container_flatlist: {
+    flex: 1,
   },
   listContent: {
     paddingVertical: 16,

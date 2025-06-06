@@ -72,8 +72,8 @@ const styles = StyleSheet.create({
         borderRadius: 16,             
         boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
         marginLeft: 16,               
-        minWidth: SCREEN_WIDTH * 0.2, 
-        maxWidth: SCREEN_WIDTH * 0.4, 
+        minWidth: SCREEN_WIDTH >= 768 ? SCREEN_WIDTH * 0.2 : SCREEN_WIDTH * 0.5 ,
+        maxWidth: SCREEN_WIDTH >= 768 ? SCREEN_WIDTH * 0.4 : SCREEN_WIDTH * 0.6 ,
         marginRight: "auto"
     },
 

@@ -1,13 +1,14 @@
 import React from "react";
 import { View, Text, StyleSheet } from "react-native";
 import { Link } from "expo-router";
+import { Colors } from "@/constants/Colors";
 
 export default function TabsNotFound() {
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Страница не найдена в табах</Text>
+      <Text style={styles.text}>Page not found</Text>
       <Link href="/" style={styles.button}>
-        <Text style={styles.buttonText}>На главную</Text>
+        <Text style={styles.buttonText}>Back to Home</Text>
       </Link>
     </View>
   );
@@ -16,7 +17,7 @@ export default function TabsNotFound() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#121212",
+    backgroundColor: Colors.dark.Deep_Container,
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
@@ -27,13 +28,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   button: {
-    backgroundColor: "#3478F6",
+    backgroundColor: Colors.dark.Accent,
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
   },
   buttonText: {
-    color: "#FFFFFF",
+    color: "#000000",
     fontSize: 16,
     fontWeight: "600",
   },

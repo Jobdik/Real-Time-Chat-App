@@ -4,10 +4,11 @@ import { useLocalSearchParams, Redirect } from "expo-router";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
 import MessageList from "../../components/ui/MessageList";
 import UserList from "../../components/ui/UserList";
-import { useChat, ChatUser, ChatMessage } from "../../hooks/useChat";
+import { useChat, ChatUser } from "../../hooks/useChat";
 import { Colors } from "@/constants/Colors";
 import { HoverableIcon } from "@/components/ui/HoverableIcon";
 import AnimatedTextInput from "@/components/ui/AnimatedTextInput";
+import LoadingAnimation from "@/components/ui/LoadingAnimation";
 
 
 export default function ChatScreen() {
@@ -21,9 +22,7 @@ export default function ChatScreen() {
   }
 
   // Custom chat hook handles messages, users, and likes
-  const { messages, users, sendMessage, likeMessage, likedSet } = useChat(
-    username
-  );
+  const { messages, users, sendMessage, likeMessage, likedSet, error, isConnecting } = useChat( username);
 
   const [input, setInput] = useState<string>("");
   const [showUsers, setShowUsers] = useState<boolean>(false);
@@ -80,12 +79,20 @@ export default function ChatScreen() {
 
         {/* Message list */}
         <View style={[styles.messagesContainerWrapper, styles.shadow]}>
-          <MessageList
-            messages={messages}
-            likeMessage={likeMessage}
-            likedSet={likedSet}
-            userId={{ id: Number(userId) }}
-          />
+         {(isConnecting || error) ? ( 
+            <View style={styles.loadingContainer}>
+              {isConnecting && <LoadingAnimation />}
+              {error &&  <Text style={styles.loadingText}>{error}</Text>}
+            </View>
+          ):(
+            <MessageList
+              messages={messages}
+              likeMessage={likeMessage}
+              likedSet={likedSet}
+              userId={{ id: Number(userId) }}
+            />
+          )}
+           
         </View>
 
         {/* Input field with send button */}
@@ -131,7 +138,7 @@ export default function ChatScreen() {
           },
         ]}
       >
-        <UserList users={users as ChatUser[]} />
+        <UserList users={users as ChatUser[]} onClose={() => setShowUsers(false)} />
       </Animated.View>
       
     </View>
@@ -256,7 +263,26 @@ const styles = StyleSheet.create({
     borderRadius: 64,
   },
   rightContainer: {
-    backgroundColor: Colors.dark.Container,
+    right: 0,
+    height: "100%",
+    position:SCREEN_WIDTH >= 768 ? "relative" : "absolute",
+  },
+
+  loadingContainer:{
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText:{
+    color: "#FFFFFF",
+    fontSize: 16,
+    lineHeight: 20,
+    textAlign: "left",
+    backgroundColor: Colors.dark.Deep_Container,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    margin: 0,
   },
 
   shadow:{
